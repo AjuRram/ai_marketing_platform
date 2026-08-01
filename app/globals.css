@@ -1,0 +1,206 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------------------------------------------------------------------------
+   Design tokens.
+
+   Values are RAW RGB CHANNELS ("255 107 74"), never finished colours. See the
+   comment in tailwind.config.ts for why — in short, it is what makes
+   `bg-brand/12` produce a translucent surface instead of a solid one.
+
+   The light theme is a pure token swap. There is not a single `dark:` variant
+   in the component tree, which means a new surface can never be "themed wrong"
+   — it inherits correctness from whichever token it uses.
+   --------------------------------------------------------------------------- */
+
+:root {
+  --canvas: 10 11 13;
+  --surface: 19 21 25;
+  --raised: 28 31 37;
+  --hairline: 42 46 54;
+
+  --ink: 237 239 242;
+  --muted: 155 163 175;
+  --faint: 107 114 128;
+
+  --brand: 255 107 74;
+  --brand-ink: 26 10 5;
+
+  --up: 45 212 191;
+  --down: 244 82 107;
+  --warn: 245 165 36;
+  --info: 91 141 239;
+
+  --email: 255 107 74;
+  --social: 45 212 191;
+  --blog: 245 165 36;
+
+  --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px -12px rgb(0 0 0 / 0.5);
+  color-scheme: dark;
+}
+
+.light {
+  --canvas: 251 250 249;
+  --surface: 255 255 255;
+  --raised: 243 241 239;
+  --hairline: 228 224 220;
+
+  --ink: 22 24 29;
+  --muted: 90 97 105;
+  --faint: 138 145 153;
+
+  --brand: 226 74 40;
+  --brand-ink: 255 255 255;
+
+  --up: 13 148 136;
+  --down: 220 38 69;
+  --warn: 180 83 9;
+  --info: 37 99 235;
+
+  --email: 226 74 40;
+  --social: 13 148 136;
+  --blog: 180 83 9;
+
+  --shadow-card: 0 1px 2px rgb(24 20 18 / 0.05), 0 8px 24px -14px rgb(24 20 18 / 0.14);
+  color-scheme: light;
+}
+
+@layer base {
+  * {
+    border-color: rgb(var(--hairline));
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: rgb(var(--canvas));
+    color: rgb(var(--ink));
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Never let the page itself scroll sideways. Wide content scrolls inside
+       its own container instead — see .scroll-x. */
+    overflow-x: hidden;
+  }
+
+  /* Focus rings are brand-coloured and always visible for keyboard users, but
+     suppressed for mouse users via :focus-visible. */
+  :focus-visible {
+    outline: 2px solid rgb(var(--brand));
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  ::selection {
+    background: rgb(var(--brand) / 0.28);
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgb(var(--hairline));
+    border-radius: 999px;
+    border: 2px solid rgb(var(--canvas));
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgb(var(--faint) / 0.6);
+  }
+}
+
+@layer components {
+  .card {
+    background-color: rgb(var(--surface));
+    border: 1px solid rgb(var(--hairline));
+    border-radius: theme("borderRadius.card");
+    box-shadow: var(--shadow-card);
+  }
+
+  .card-pad {
+    padding: 1rem 1.125rem;
+  }
+
+  /* Small uppercase label used above every stat and form field. */
+  .eyebrow {
+    font-size: 0.6875rem;
+    line-height: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgb(var(--faint));
+  }
+
+  .thead {
+    background-color: rgb(var(--raised) / 0.5);
+  }
+
+  .divider {
+    height: 1px;
+    background-color: rgb(var(--hairline));
+  }
+
+  /* Horizontal scroll container for wide tables.
+     PAIR THIS WITH `min-w-0` ON THE PARENT GRID/FLEX CHILD. A grid child
+     defaults to `min-width: auto`, which means it expands to fit its widest
+     descendant instead of clipping it — the table blows the column out and the
+     page scrolls sideways rather than the container. This is the single most
+     common responsive bug in a dashboard layout. */
+  .scroll-x {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+    background-color: rgb(var(--raised));
+  }
+  .skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      rgb(var(--ink) / 0.06),
+      transparent
+    );
+    animation: shimmer 1.6s infinite;
+  }
+}
+
+@layer utilities {
+  /* Tabular figures. Mandatory on every number that can change in place —
+     without it, digits have different widths and columns jitter on each tick. */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+
+  .mono {
+    font-family: var(--font-mono), ui-monospace, SFMono-Regular, monospace;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
