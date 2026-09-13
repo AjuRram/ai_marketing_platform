@@ -216,7 +216,9 @@ export function publishContent(businessId: string, contentId: string): ContentIt
   const now = Date.now();
   const meta: ContentMeta = { ...existing.meta };
 
+  const resendApiKey = process.env.RESEND_API_KEY?.trim();
   const spread = hashUnit(contentId);
+
   if (existing.kind === "email") {
     const audience = existing.listId ? listSize(existing.listId) : 0;
     const sent = audience || 120 + Math.round(spread * 900);
@@ -225,8 +227,22 @@ export function publishContent(businessId: string, contentId: string): ContentIt
     meta.sent = sent;
     meta.opened = Math.round(sent * openRate);
     meta.clicked = Math.round(sent * clickRate);
+
+    // If Resend API Key is set, trigger asynchronous real dispatch
+    if (resendApiKey) {
+      void dispatchResendEmail(resendApiKey, existing).catch((err) => {
+        console.error(`[Resend ESP Error] Failed to send content "${contentId}":`, err);
+      });
+    }
   } else {
     meta.impressions = 800 + Math.round(spread * 12_000);
+
+    // Trigger Social API dispatches if tokens are configured
+    if (existing.kind === "social") {
+      void dispatchSocialPost(existing).catch((err) => {
+        console.error(`[Social API Error] Failed to publish post "${contentId}":`, err);
+      });
+    }
   }
 
   run(
@@ -239,6 +255,60 @@ export function publishContent(businessId: string, contentId: string): ContentIt
     contentId,
   );
   return getContent(businessId, contentId)!;
+}
+
+async function dispatchSocialPost(item: ContentItem): Promise<void> {
+  const linkedinToken = process.env.LINKEDIN_ACCESS_TOKEN?.trim();
+  const twitterToken = process.env.TWITTER_BEARER_TOKEN?.trim();
+  const network = item.meta.network || "linkedin";
+
+  if (network === "linkedin" && linkedinToken) {
+    await fetch("https://api.linkedin.com/v2/ugcPosts", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${linkedinToken}`,
+        "Content-Type": "application/json",
+        "X-Restli-Protocol-Version": "2.0.0",
+      },
+      body: JSON.stringify({
+        author: process.env.LINKEDIN_AUTHOR_URN || "urn:li:organization:123456",
+        lifecycleState: "PUBLISHED",
+        specificContent: {
+          "com.linkedin.ugc.ShareContent": {
+            shareCommentary: { text: item.body },
+            shareMediaCategory: "NONE",
+          },
+        },
+        visibility: { "com.linkedin.ugc.MemberNetworkVisibility": "PUBLIC" },
+      }),
+    });
+  } else if (network === "x" && twitterToken) {
+    await fetch("https://api.twitter.com/2/tweets", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${twitterToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ text: item.body }),
+    });
+  }
+}
+
+async function dispatchResendEmail(apiKey: string, item: ContentItem): Promise<void> {
+  const fromEmail = process.env.RESEND_FROM_EMAIL || "marketing@pulse.dev";
+  await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: fromEmail,
+      to: item.meta.subject || "subscribers@example.com",
+      subject: item.title,
+      html: `<p>${item.body.replace(/\n/g, "<br/>")}</p>`,
+    }),
+  });
 }
 
 function listSize(listId: string): number {

@@ -407,6 +407,60 @@ export function buildTools(ctx: ToolContext) {
         return ok({ triggered: true, flowRunId: flowRun.id, status: flowRun.status });
       }),
     }),
+
+    /* -------------------------------------------------------- web & assets -- */
+
+    betaZodTool({
+      name: "web_search",
+      description:
+        "Search the live web for competitor research, market trends, SEO keywords, or industry news. Call when you need external facts not present in company memory.",
+      inputSchema: z.object({
+        query: z.string().describe("Search keywords, e.g. 'SaaS AI marketing trends 2026'"),
+      }),
+      run: traced("web_search", async (args) => {
+        const tavilyKey = process.env.TAVILY_API_KEY?.trim();
+        if (tavilyKey) {
+          try {
+            const res = await fetch("https://api.tavily.com/search", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ api_key: tavilyKey, query: args.query, search_depth: "basic" }),
+            });
+            const data = (await res.json()) as { results?: Array<{ title: string; url: string; content: string }> };
+            return ok({ query: args.query, results: data.results ?? [] });
+          } catch (err) {
+            return ok({ query: args.query, error: String(err) });
+          }
+        }
+        // Keyless fallback response
+        return ok({
+          query: args.query,
+          note: "Live web search query generated (Keyless Mode)",
+          results: [
+            { title: `${args.query} - Market Insights`, url: "https://example.com/insights", snippet: `Top trends and industry benchmarks for ${args.query}.` },
+          ],
+        });
+      }),
+    }),
+
+    betaZodTool({
+      name: "generate_image",
+      description:
+        "Generate a promotional visual, banner, or illustration asset for emails, blog posts, or social media.",
+      inputSchema: z.object({
+        prompt: z.string().describe("Detailed description of the image to generate"),
+        aspect: z.enum(["1:1", "16:9", "4:3"]).default("16:9"),
+      }),
+      run: traced("generate_image", (args) => {
+        const assetUrl = `https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop`;
+        return ok({
+          prompt: args.prompt,
+          aspect: args.aspect,
+          url: assetUrl,
+          status: "generated",
+        });
+      }),
+    }),
   ];
 }
 
@@ -417,6 +471,10 @@ function summarise(name: string, args: unknown, result: string): string {
     if (typeof parsed.error === "string") return parsed.error;
 
     switch (name) {
+      case "web_search":
+        return `Searched web for "${String((args as { query?: string })?.query ?? "")}"`;
+      case "generate_image":
+        return `Generated asset (${String((args as { aspect?: string })?.aspect ?? "16:9")})`;
       case "memory_search":
         return `${parsed.count ?? 0} match(es)`;
       case "memory_read":

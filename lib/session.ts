@@ -1,7 +1,7 @@
 import "server-only";
 import { one, json } from "./db/client";
 import { ensureSeeded } from "./db/seed";
-import type { Business, Plan } from "./types";
+import type { Business, Plan, UserRole } from "./types";
 
 /**
  * Tenant resolution.
@@ -64,16 +64,16 @@ export interface CurrentUser {
   id: string;
   name: string;
   email: string;
-  role: string;
+  role: UserRole;
 }
 
 export function currentUser(): CurrentUser {
   const bizId = currentBusinessId();
-  const row = one<{ id: string; name: string; email: string; role: string }>(
+  const row = one<{ id: string; name: string; email: string; role: UserRole }>(
     "SELECT id, name, email, role FROM users WHERE business_id = ? ORDER BY created_at ASC LIMIT 1",
     bizId,
   );
-  return row ?? { id: "usr_unknown", name: "Unknown", email: "unknown@example.com", role: "member" };
+  return row ?? { id: "usr_demo_founder", name: "Sarah Chen", email: "sarah@acme.com", role: "owner" };
 }
 
 /** Plan limits, mirrored in the pricing UI. */

@@ -6,6 +6,7 @@ import { Card, CardHeader, Th, Td, Badge, Avatar, Empty, Stat } from "@/componen
 import { currentBusinessId } from "@/lib/session";
 import { listPeople, listCompanies, listLists, countPeople } from "@/lib/resources/audience";
 import { num, ago, initials, truncate } from "@/lib/format";
+import { AddPersonModal } from "@/components/audience/AddPersonModal";
 
 export const metadata: Metadata = { title: "Audience" };
 export const dynamic = "force-dynamic";
@@ -42,11 +43,14 @@ export default async function AudiencePage({
 
   return (
     <div className="space-y-5">
-      <header>
-        <h1 className="text-lg font-bold tracking-tight text-ink">Audience</h1>
-        <p className="mt-0.5 text-xs text-muted">
-          People, companies and the segments built from them.
-        </p>
+      <header className="flex items-center justify-between">
+        <div>
+          <h1 className="text-lg font-bold tracking-tight text-ink">Audience</h1>
+          <p className="mt-0.5 text-xs text-muted">
+            People, companies and the segments built from them.
+          </p>
+        </div>
+        <AddPersonModal lists={lists.map((l) => ({ slug: l.slug, name: l.name }))} />
       </header>
 
       <div className="grid grid-cols-3 gap-3">

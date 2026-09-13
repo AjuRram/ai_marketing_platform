@@ -15,6 +15,8 @@ import {
   Sun,
   Moon,
   Zap,
+  Crown,
+  PenTool,
 } from "lucide-react";
 import { Meter } from "../ui/Primitives";
 
@@ -28,12 +30,14 @@ export interface ShellBusiness {
 }
 
 const NAV = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/agent", label: "Agent", icon: Sparkles },
-  { href: "/audience", label: "Audience", icon: Users },
-  { href: "/content", label: "Content", icon: FileText },
+  { href: "/super-admin", label: "Pulse Super Admin", icon: Crown },
+  { href: "/dashboard", label: "Company CRM", icon: LayoutDashboard },
+  { href: "/user-portal", label: "Team Creator Studio", icon: PenTool },
+  { href: "/agent", label: "Agent Console", icon: Sparkles },
+  { href: "/audience", label: "Audience CDP", icon: Users },
+  { href: "/content", label: "Content Pipeline", icon: FileText },
   { href: "/flows", label: "Flows", icon: Workflow },
-  { href: "/memory", label: "Memory", icon: Brain },
+  { href: "/memory", label: "Brand Memory", icon: Brain },
   { href: "/settings", label: "Settings", icon: Settings },
 ] as const;
 

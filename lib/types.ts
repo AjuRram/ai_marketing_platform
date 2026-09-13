@@ -7,11 +7,21 @@
  */
 
 export type Plan = "free" | "starter" | "team" | "pro" | "scale";
+export type UserRole = "owner" | "admin" | "marketer" | "viewer";
 export type ContentKind = "email" | "social" | "blog";
 export type ContentStatus = "draft" | "scheduled" | "published";
 export type RunStatus = "running" | "awaiting_approval" | "done" | "failed" | "refused";
 export type FlowRunStatus = "running" | "waiting" | "done" | "failed";
 export type JobStatus = "pending" | "running" | "done" | "failed";
+
+export interface User {
+  id: string;
+  businessId: string;
+  email: string;
+  name: string;
+  role: UserRole;
+  createdAt: number;
+}
 
 export interface Business {
   id: string;

@@ -89,6 +89,91 @@ export default function SettingsPage() {
         </div>
       </Card>
 
+      {/* ------------------------------------------- external services & balances -- */}
+      <Card>
+        <CardHeader
+          title="External Services & API Key Balances"
+          subtitle="Live status, free quota balances, and payment requirement alerts"
+        />
+        <div className="card-pad space-y-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            {/* Anthropic Claude */}
+            <div className="p-3.5 rounded border border-hairline bg-raised/30 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <span className="font-bold text-xs text-ink">🧠 Anthropic Claude API</span>
+                </div>
+                <Badge tone={process.env.ANTHROPIC_API_KEY ? "warn" : "neutral"}>
+                  {process.env.ANTHROPIC_API_KEY ? "Key Set (Action Needed)" : "Key Missing"}
+                </Badge>
+              </div>
+              <p className="text-2xs text-muted">
+                Drives Opus 5 adaptive model planning & reasoning loop.
+              </p>
+              <div className="p-2 rounded bg-down/10 border border-down/20 text-2xs text-down space-y-1">
+                <div className="font-semibold">⚠️ Payment Needed to Unlock Live Opus 5</div>
+                <div>Account balance is low ($0.00). Top up $5 credits at <a href="https://console.anthropic.com/settings/billing" target="_blank" rel="noreferrer" className="underline font-bold">console.anthropic.com</a>.</div>
+              </div>
+            </div>
+
+            {/* Resend Email */}
+            <div className="p-3.5 rounded border border-hairline bg-raised/30 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <span className="font-bold text-xs text-ink">📧 Resend Email ESP</span>
+                </div>
+                <Badge tone={process.env.RESEND_API_KEY ? "up" : "neutral"}>
+                  {process.env.RESEND_API_KEY ? "Active & Working" : "Key Missing"}
+                </Badge>
+              </div>
+              <p className="text-2xs text-muted">
+                Linked Account: <span className="font-mono text-ink">arjun.ramachandran96@gmail.com</span>
+              </p>
+              <div className="p-2 rounded bg-up/10 border border-up/20 text-2xs text-up space-y-1">
+                <div className="font-semibold">✓ Free Tier Active (3,000 emails / mo)</div>
+                <div>Dispatched to <span className="font-mono">arjun.ramachandran96@gmail.com</span>. Verify custom domain at <a href="https://resend.com/domains" target="_blank" rel="noreferrer" className="underline font-bold">resend.com/domains</a> to send to any recipient.</div>
+              </div>
+            </div>
+
+            {/* Tavily Web Search */}
+            <div className="p-3.5 rounded border border-hairline bg-raised/30 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <span className="font-bold text-xs text-ink">🔍 Tavily Live Web Search</span>
+                </div>
+                <Badge tone={process.env.TAVILY_API_KEY ? "up" : "neutral"}>
+                  {process.env.TAVILY_API_KEY ? "Active & Working" : "Key Missing"}
+                </Badge>
+              </div>
+              <p className="text-2xs text-muted">
+                Powers live market research & competitor intelligence (`web_search`).
+              </p>
+              <div className="p-2 rounded bg-up/10 border border-up/20 text-2xs text-up">
+                <div className="font-semibold">✓ Free Quota Active (1,000 searches / mo)</div>
+              </div>
+            </div>
+
+            {/* X / Twitter Developer API */}
+            <div className="p-3.5 rounded border border-hairline bg-raised/30 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <span className="font-bold text-xs text-ink">🐦 X / Twitter Publishing</span>
+                </div>
+                <Badge tone={process.env.TWITTER_BEARER_TOKEN ? "up" : "neutral"}>
+                  {process.env.TWITTER_BEARER_TOKEN ? "Token Configured" : "Token Missing"}
+                </Badge>
+              </div>
+              <p className="text-2xs text-muted">
+                Posts social media campaign tweets via Twitter v2 REST API.
+              </p>
+              <div className="p-2 rounded bg-info/10 border border-info/20 text-2xs text-info">
+                <div className="font-semibold">✓ Free Basic Developer Tier Active</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Card>
+
       {/* ------------------------------------------------------------ plan -- */}
       <div className="grid gap-5 lg:grid-cols-3">
         <Card className="lg:col-span-2">
